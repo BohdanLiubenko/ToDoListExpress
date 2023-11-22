@@ -27,7 +27,7 @@ class userController {
                     username: username
                 });
 
-                req.session.token = jwtProvider.sign({ userId: user.id }, jwtUtil.jwtSecret, { expiresIn: '1h' });
+                req.session.token = jwtProvider.sign({ userId: user.id, role: user.role }, jwtUtil.jwtSecret, { expiresIn: '1h' });
 
                 res.redirect('/');
             }
@@ -53,17 +53,18 @@ class userController {
             if (error != '') {
                 res.render('user/login', { error });
             }
+            else {
 
-            req.session.token = jwtProvider.sign({ userId: user.id }, jwtUtil.jwtSecret, { expiresIn: '1h' });
-            
-            res.redirect('/');
-            
+                req.session.token = jwtProvider.sign({ userId: user.id, role: user.role }, jwtUtil.jwtSecret, { expiresIn: '1h' });
+
+                res.redirect('/');
+            }
         } catch (error) {
             next(error);
         }
     }
 
-    async logout(req, res, next){
+    async logout(req, res, next) {
         req.session.token = null;
         res.redirect('/');
     }

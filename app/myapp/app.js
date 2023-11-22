@@ -7,6 +7,7 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var userRouter = require('./routes/user');
 var todoRouter = require('./routes/todolist');
+var adminRouter = require('./routes/admin');
 
 var sequelize = require('./util/db');
 
@@ -32,12 +33,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
   secret: 'secret',
   resave: false,
-  saveUninitialized: true
-}))
+  saveUninitialized: true,
+  token: 'token'
+}));
 
 app.use('/', indexRouter);
 app.use('/user', userRouter);
 app.use('/todolist', todoRouter);
+app.use('/admin', adminRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -62,12 +65,17 @@ app.listen(async () => {
     await initToDoListModel();
     await initUserModel();
     await sequelize.sync({force: true});
-    const hashPassword = await bcrypt.hash('root', 10);
+    
     await User.create({
         email: 'admin@admin.com',
-        password: hashPassword,
+        password: await bcrypt.hash('root', 10),
         username: 'admin',
         role: 'ADMIN'
+    });
+    await User.create({
+      email: 'bb@bb.bb',
+      password: await bcrypt.hash('bbbb',10),
+      username: 'user',
     });
     console.log('Database synchronized successfully');
   } catch (error) {

@@ -1,12 +1,176 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
+
+<head>
+    <title>main</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-    <a href="user/logout">logout</a>
-  </body>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">ToDoList</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <% if(role=='ADMIN' ){%>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">Admin Panel</a>
+                    </li>
+                    <% }%>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <p class="navbar-text mr-3">Welcome back <%= username %>
+                    </p>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="user/logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1>
+            Your to do list
+        </h1>
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#createTodoModal">
+            Create Todo
+        </button>
+        <ul class="list-group-flush mt-3">
+            <% for (const todo of todolists) { %>
+                <li class="list-group-item">
+                    <input type="checkbox" id="<%= `todo-${todo.id}` %>" data-todoid="<%= todo.id %>" <% if
+                        (todo.is_done) { %> checked <% } %>
+                        />
+                        <label for="<%= `todo-${todo.id}` %>"
+                            class="editable-label <% if (todo.is_done) { %>crossed-out<% } %>">
+                            <span class="editable" contenteditable="true" data-todoid="<%= todo.id %>"
+                                data-field="name">
+                                <%= todo.name %>
+                            </span> -
+                            <span class="editable" contenteditable="true" data-todoid="<%= todo.id %>"
+                                data-field="description">
+                                <% if (todo.description) { %>
+                                    <%= todo.description %>
+                                        <% } else { %>
+                                            Enter description here
+                                            <% } %>
+                            </span>
+                            <button class="btn btn-danger btn-sm float-right ml-2" onclick="handleDelete('<%= todo.id %>')">Delete</button>
+                        </label>
+                </li>
+                <% } %>
+        </ul>
+    </div>
+
+    <!-- Create Todo Modal -->
+    <div class="modal" id="createTodoModal" tabindex="-1" role="dialog" aria-labelledby="createTodoModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createTodoModalLabel">Create Todo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/todolist/create" method="POST">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea id="description" name="description" class="form-control"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">Create</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const editableLabels = document.querySelectorAll('.editable-label .editable');
+
+            async function handleEdit(event) {
+                const todoId = event.target.getAttribute('data-todoid');
+                const checkbox = document.getElementById(`todo-${todoId}`);
+                const name = document.querySelector(`[data-todoid="${todoId}"][data-field="name"]`).textContent.trim();
+                const description = document.querySelector(`[data-todoid="${todoId}"][data-field="description"]`).textContent.trim();
+                const isDone = checkbox.checked;
+
+                try {
+
+                    await fetch(`/todolist/update/${todoId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        redirect: 'manual',
+                        body: JSON.stringify({
+                            name: name,
+                            description: description,
+                            is_done: isDone,
+                        }),
+                    }).then(response => {
+                        if (response.status == 200) {
+                            window.location.href = '/';
+                        }
+                    });
+
+                    // Optionally, you can update the UI here based on the response
+                    console.log(`Todo item ${todoId} updated`);
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+
+            editableLabels.forEach(editable => {
+                editable.addEventListener('blur', handleEdit);
+
+                // Prevent checking the checkbox when clicking on the span for editing
+                editable.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('editable')) {
+                        event.preventDefault();
+                    }
+                });
+            });
+
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', handleEdit);
+            });
+        });
+        async function handleDelete(todoId){
+            if(confirm('Are you sure you want to delete this todo?')){
+                try {
+                    await fetch(`/todolist/delete/${todoId}`,{
+                        method: 'DELETE',
+                    }).then(res => {
+                        if(res.status == 200){
+                            window.location.href = '/';
+                        }
+                    });
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        }
+    </script>
+</body>
+
 </html>

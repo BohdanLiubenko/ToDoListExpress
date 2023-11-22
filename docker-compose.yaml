@@ -1,0 +1,40 @@
+version: "3"
+
+services:
+  
+  app:
+    container_name: app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    image: node_app
+    ports:
+      - 3000:3000
+    environment:
+      - DB_HOST=postgresql
+    depends_on:
+      - postgresql
+    command: npm run dev
+    networks:
+      - net
+
+  postgresql:
+    container_name: postgresql
+    image: 'bitnami/postgresql:14'
+    restart: always
+    environment:
+      POSTGRESQL_USERNAME: root
+      POSTGRESQL_PASSWORD: root
+      POSTGRESQL_DATABASE: to_do_list
+    ports:
+      - 5432:5432
+    networks:
+      - net
+    volumes:
+      - postgresql-persistence:/bitnami/postgresql
+
+volumes:
+  postgresql-persistence:
+
+networks:
+  net:
