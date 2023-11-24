@@ -68,6 +68,14 @@ class userController {
         req.session.token = null;
         res.redirect('/');
     }
+
+    async rendeRegister(req, res, next) {
+        res.render('user/register', { errors: {} });
+    }
+
+    async rendeLogin(req, res, next) {
+        res.render('user/login', { error: '' });
+    }
 }
 
 module.exports = new userController();
