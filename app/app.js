@@ -17,7 +17,7 @@ const { initUserModel, User } = require('./models/user');
 const { initToDoListModel } = require('./models/todolist');
 
 const bcrypt = require('bcryptjs');
-
+const port = process.env.PORT || 3000;
 var app = express();
 
 // view engine setup
@@ -43,12 +43,12 @@ app.use('/todolist', todoRouter);
 app.use('/admin', adminRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -58,23 +58,23 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-app.listen(async () => {
+app.listen(port, async () => {
   console.log(`Server running`);
   try {
-    await sequelize.authenticate(); 
+    await sequelize.authenticate();
     await initToDoListModel();
     await initUserModel();
-    await sequelize.sync({force: true});
-    
+    await sequelize.sync({ force: true });
+
     await User.create({
-        email: 'admin@admin.com',
-        password: await bcrypt.hash('root', 10),
-        username: 'admin',
-        role: 'ADMIN'
+      email: 'admin@admin.com',
+      password: await bcrypt.hash('root', 10),
+      username: 'admin',
+      role: 'ADMIN'
     });
     await User.create({
       email: 'bb@bb.bb',
-      password: await bcrypt.hash('bbbb',10),
+      password: await bcrypt.hash('bbbb', 10),
       username: 'user',
     });
     console.log('Database synchronized successfully');

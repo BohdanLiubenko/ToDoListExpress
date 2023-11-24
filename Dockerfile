@@ -1,12 +1,12 @@
 FROM node:14
 
-WORKDIR /app
+WORKDIR ./app
 
-COPY ./myapp/package*.json .
+COPY ./package*.json .
 
 RUN npm install
 
-COPY ./myapp .
+COPY . .
 
 EXPOSE 3000
 

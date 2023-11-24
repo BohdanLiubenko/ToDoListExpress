@@ -5,7 +5,7 @@ services:
   app:
     container_name: app
     build:
-      context: ./app
+      context: ./
       dockerfile: Dockerfile
     image: node_app
     ports:
