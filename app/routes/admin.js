@@ -1,8 +1,8 @@
-var express = require('express');
-var router = express.Router();
-const controller = require('../controllers/adminController');
-const authMiddleware = require('../controllers/middleware/authMiddleware');
+const express = require('express')
+const router = express.Router()
+const controller = require('../controllers/adminController')
+const authMiddleware = require('../middleware/authMiddleware')
 
-router.get('/', authMiddleware, controller.renderIndex);
+router.get('/', authMiddleware, controller.renderIndex)
 
-module.exports = router;
+module.exports = router
