@@ -6,13 +6,13 @@ class UserController {
   async register (req, res, next) {
     const { email, password, username } = req.body
     const errors = {}
-
+    const isValidPassword = authUtil.passwordValidate(password)
     if (!authUtil.emailValidate(email)) {
       errors.email = 'Invalid email'
     }
 
-    if (!authUtil.passwordValidate(password)) {
-      errors.password = 'Invalid password'
+    if (isValidPassword !== true) {
+      errors.password = isValidPassword
     }
 
     if (Object.values(errors).length > 0) {

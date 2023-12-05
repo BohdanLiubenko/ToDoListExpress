@@ -5,15 +5,15 @@ const emailValidate = (email) => {
 
 const passwordValidate = (password) => {
   if (password.length < 8) {
-    return false
+    return 'Password must be at least 8 characters long'
   }
 
   if (!/[A-Z]/.test(password)) {
-    return false
+    return 'Password must contain uppercase letters'
   }
 
   if ((password.match(/[0-9]/g) || []).length < 3) {
-    return false
+    return 'Password must contain numbers(at least 3)'
   }
 
   return true
